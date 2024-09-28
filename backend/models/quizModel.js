@@ -3,10 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 // Quiz Schema
 const quizSchema = new mongoose.Schema({
-  quizID: {
-    type: String,
-    default: uuidv4,
-  },
+  
   title: {
     type: String,
     required: true,

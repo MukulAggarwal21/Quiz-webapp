@@ -4,7 +4,8 @@ import jwt from 'jsonwebtoken';
 
 // Register Admin
 export const registerAdmin = async (req, res) => {
- 
+     const { email , password , name}= req.body;
+     const admin = Admin.findOne()
 };
 
 

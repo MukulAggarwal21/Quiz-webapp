@@ -1,30 +1,40 @@
 import mongoose from 'mongoose';
 
-// Question Schema
-const questionSchema = new mongoose.Schema({
-  quizID: {
+// Quiz Schema
+const quizSchema = new mongoose.Schema({
+  title: {
+    type: String,
+    required: true,
+  },
+  questions: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Quiz',
+    ref: 'Question', // Reference to Question model
+  }],
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Admin',
     required: true,
   },
-  question: {
-    type: String,
+  startTime: {
+    type: Date,
+  },
+  endTime: {
+    type: Date,
+  },
+  duration: {
+    type: Number, // Duration in minutes
     required: true,
   },
-  answer: {
-    type: String,
-    required: true,
-  },
-  options: {
-    type: [String],
-    validate: [arrayLimit, '{PATH} exceeds the limit of 4 options'], // Max 4 options
+  fastestFinish: {
+    student: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Student',
+    },
+    time: {
+      type: Number, // Time in seconds
+    },
   },
 }, { timestamps: true });
 
-// Ensure there are no more than 4 options per question
-function arrayLimit(val) {
-  return val.length <= 4;
-}
-
-const Question = mongoose.model('Question', questionSchema);
-export default Question;
+const Quiz = mongoose.model('Quiz', quizSchema);
+export default Quiz;
