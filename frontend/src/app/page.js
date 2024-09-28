@@ -1,101 +1,131 @@
-import Image from "next/image";
+"use client";
+
+import {
+  GoogleGenerativeAI,
+  HarmCategory,
+  HarmBlockThreshold,
+} from "@google/generative-ai";
+import { useState } from "react";
+
+const MODEL_NAME = "gemini-1.0-pro";
+const API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.js
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [data, setData] = useState([]);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  async function runChat(prompt) {
+    const genAI = new GoogleGenerativeAI(API_KEY);
+    const model = genAI.getGenerativeModel({ model: MODEL_NAME });
+
+    const generationConfig = {
+      temperature: 0.9,
+      topK: 1,
+      topP: 1,
+      maxOutputTokens: 2048,
+    };
+
+    const safetySettings = [
+      {
+        category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+      },
+      {
+        category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+      },
+      {
+        category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+      },
+      {
+        category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+      },
+    ];
+
+    const chat = model.startChat({
+      generationConfig,
+      safetySettings,
+      history: [
+        {
+          role: "user",
+          parts: [{ text: "HELLO" }],
+        },
+        {
+          role: "model",
+          parts: [{ text: "Hello there! How can I assist you today?" }],
+        },
+      ],
+    });
+
+    // Modify the prompt to request a proper JSON response
+    const formattedPrompt = `Generate 20 multiple choice questions about "${prompt}" with 4 answer options each. Each question should have 4 options numbered 1, 2, 3, and 4, and specify one correct answer. Return the result in this format as an array of JSON objects, each having "question", "option1", "option2", "option3", "option4", and "correctAnswer" without any additional characters or formatting.`;
+
+    const result = await chat.sendMessage(formattedPrompt);
+    const responseText = result.response.text(); // Get the response text
+
+    // Log the raw response
+    console.log("Raw AI response:", responseText);
+
+    // Remove any unnecessary characters (like backticks) from the response
+    const cleanedResponse = responseText.replace(/```json|```/g, '').trim();
+
+    // Parse response if it's a stringified JSON
+    try {
+      const parsedData = JSON.parse(cleanedResponse); // Parse the cleaned response
+      setData(parsedData); // Save the parsed data in the state
+    } catch (error) {
+      console.error("Error parsing AI response:", error);
+      alert("The response from the AI was not in the expected format. Please try again.");
+    }
+  }
+
+  const onSubmit = async (event) => {
+    event.preventDefault();
+    const prompt = event.target.prompt.value || "";
+    runChat(prompt);
+  };
+
+  return (
+    <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-gray-100">
+      <form onSubmit={onSubmit} className="bg-white shadow-lg rounded-lg p-6 w-full max-w-md">
+        <p className="mb-4 text-lg font-semibold">Enter your topic here</p>
+        <input
+          type="text"
+          placeholder="Enter your topic here"
+          name="prompt"
+          className="border border-gray-300 p-3 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-400"
+        />
+        <br />
+        <button
+          type="submit"
+          className="w-full bg-blue-500 text-white font-bold p-3 rounded-lg mt-4 hover:bg-blue-600 transition duration-200"
+        >
+          Submit
+        </button>
+      </form>
+
+      {data.length > 0 && (
+        <div className="mt-8 w-full max-w-2xl bg-white p-6 rounded-lg shadow-md">
+          <h1 className="text-2xl font-bold mb-4">Generated Questions</h1>
+          <ul className="space-y-6">
+            {data.map((questionData, index) => (
+              <li key={index} className="p-4 border border-gray-300 rounded-lg">
+                <p className="text-lg font-semibold mb-2">{`${index + 1}. ${questionData.question}`}</p>
+                <ul className="pl-4">
+                  <li className="mb-1">1. {questionData.option1}</li>
+                  <li className="mb-1">2. {questionData.option2}</li>
+                  <li className="mb-1">3. {questionData.option3}</li>
+                  <li className="mb-1">4. {questionData.option4}</li>
+                </ul>
+                <p className="text-green-600 font-bold mt-2">
+                  Correct Answer: {questionData.correctAnswer}
+                </p>
+              </li>
+            ))}
+          </ul>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+      )}
+    </main>
   );
 }
