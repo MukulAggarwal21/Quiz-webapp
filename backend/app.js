@@ -17,7 +17,14 @@ connectDB();
 // Middleware
 app.use(express.json()); // For parsing JSON bodies
 app.use(cookieParser()); // Middleware to parse cookies
-app.use(cors()); // Enable CORS for all origins
+const corsOptions = {
+  origin: 'http://localhost:3000',  // Allow requests from your React app
+  credentials: true,  // Allow credentials (cookies, authentication headers)
+  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed HTTP methods
+  allowedHeaders: ['Content-Type', 'Authorization'], // Allowed headers
+};
+
+app.use(cors(corsOptions)); // Enable CORS with the defined options // Enable CORS for all origins
 
 // Routess
 app.use('/admin', adminRoutes);

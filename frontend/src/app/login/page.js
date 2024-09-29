@@ -13,18 +13,16 @@ const LoginPage = () => {
     try {
       const response=await axios
         .post(
-          "http://localhost:4000/admin/login",
+          `${process.env.URL}/admin/login`,
           { email, password },
           {
             withCredentials: true,
             headers: { "Content-Type": "application/json" },
           }
         );
-       
-           toast.success(response.data.message );
+        toast.success(response.data.message );
           setIsAuthenticated(true);
-          navigateTo("/");
-          setEmail(""); 
+           setEmail(""); 
           setPassword("");
          
       
@@ -41,7 +39,7 @@ const LoginPage = () => {
         
         <div className="flex justify-center mb-4">
           <FontAwesomeIcon icon={faUser} className="text-blue-500 text-4xl mr-2" />
-          {/* <FontAwesomeIcon icon={faLock} className="text-blue-500 text-4xl" /> */}
+         
         </div>
         
         <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
