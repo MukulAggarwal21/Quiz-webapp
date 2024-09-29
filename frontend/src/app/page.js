@@ -7,6 +7,7 @@ import {
 } from "@google/generative-ai";
 import { useState } from "react";
 
+
 const MODEL_NAME = "gemini-1.0-pro";
 const API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
 
@@ -87,7 +88,9 @@ export default function Home() {
   };
 
   return (
+   
     <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-gray-100">
+      
       <form onSubmit={onSubmit} className="bg-white shadow-lg rounded-lg p-6 w-full max-w-md">
         <p className="mb-4 text-lg font-semibold">Enter your topic here</p>
         <input
@@ -126,6 +129,7 @@ export default function Home() {
           </ul>
         </div>
       )}
+      
     </main>
   );
 }
