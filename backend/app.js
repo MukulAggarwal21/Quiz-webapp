@@ -19,8 +19,8 @@ app.use(express.json()); // For parsing JSON bodies
 app.use(cookieParser()); // Middleware to parse cookies
 app.use(cors()); // Enable CORS for all origins
 
-// Routes
-// app.use('/api/admin', adminRoutes);
+// Routess
+app.use('/admin', adminRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

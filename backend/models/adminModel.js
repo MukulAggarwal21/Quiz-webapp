@@ -6,11 +6,11 @@ const adminSchema = new Schema({
   email: {
     type: String,
     required: true,
-    // unique: true,
+    unique: true,
     lowecase: true,
     trim: true, 
 },
- Name: {
+ name: {
     type: String,
     required: true,
      

@@ -1,4 +1,4 @@
-import Quiz from '../models/quizModel.js';
+import {Quiz} from '../models/quizModel.js';
 import { v4 as uuidv4 } from 'uuid';
 
 // Create Quiz

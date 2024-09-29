@@ -7,11 +7,7 @@ const studentSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  studentQuizID: {
-    type: String,
-    default: uuidv4, // Unique ID for each student-quiz attempt
-    unique: true,
-  },
+ 
   quizID: {
     type: mongoose.Schema.Types.ObjectId, // Reference to Quiz model
     ref: 'Quiz', // Refers to the Quiz model

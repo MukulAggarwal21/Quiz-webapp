@@ -1,40 +1,26 @@
 import mongoose from 'mongoose';
 
-// Quiz Schema
-const quizSchema = new mongoose.Schema({
-  title: {
+// Question Schema
+const questionSchema = new mongoose.Schema({
+  question: {
     type: String,
     required: true,
   },
-  questions: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Question', // Reference to Question model
-  }],
-  createdBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Admin',
+  options: {
+    type: [String],
     required: true,
   },
-  startTime: {
-    type: Date,
-  },
-  endTime: {
-    type: Date,
-  },
-  duration: {
-    type: Number, // Duration in minutes
+  correctAnswer: {
+    type: Number, // Index of the correct answer
     required: true,
-  },
-  fastestFinish: {
-    student: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Student',
-    },
-    time: {
-      type: Number, // Time in seconds
-    },
-  },
+  }
 }, { timestamps: true });
 
-const Quiz = mongoose.model('Quiz', quizSchema);
-export default Quiz;
+let Question;
+try {
+  Question = mongoose.model("question");
+} catch (e) {
+  Question = mongoose.model("question", questionSchema);
+}
+
+export { Question };
