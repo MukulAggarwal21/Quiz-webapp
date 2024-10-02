@@ -1,4 +1,4 @@
-'use client'
+'use client';
 import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUserPlus } from '@fortawesome/free-solid-svg-icons';
@@ -14,18 +14,14 @@ const SignupPage = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
 
-  // Use useEffect to watch for changes in password or confirmPassword and enable/disable the button accordingly
   useEffect(() => {
-    if (password && confirmPassword && password === confirmPassword) {
-      setIsButtonDisabled(false); // Enable the button when passwords match
-    } else {
-      setIsButtonDisabled(true); // Disable the button when passwords don't match
-    }
+    // Enable button if passwords match
+    setIsButtonDisabled(!(password && confirmPassword && password === confirmPassword));
   }, [password, confirmPassword]);
 
   const handleSignup = async (e) => {
     e.preventDefault();
-
+  
     if (!name) {
       toast.error("Please provide your name");
       return; 
@@ -38,38 +34,38 @@ const SignupPage = () => {
       toast.error("Please provide the password");
       return; 
     }
-
+  
     try {
-      const response = await axios.post(
-        "http://localhost:5000/admin/signup",
-        { name, email, password },
-        {
-          withCredentials: true,
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-      console.dir(  "my response" , response.response)
-      if(response.status==200){
-        // console.dir(response.data.msg)
-        toast.success(response.response.data.msg||"Signup succes");
-        // console.dir(response)
-      setIsAuthenticated(true); 
-      }
-      else{
-        toast.error(response.response.data.msg|| "An error occurred during registration");
-      }
-     
-    } catch (error) {
-      // console.log(error);
-      if (error.response) {
-        
-        toast.error(error.message|| "An error occurred during registration");
+      const response = await fetch("http://localhost:5000/admin/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ name, email, password }),
+      });
+  
+      const data = await response.json();
+      console.log(data)
+  
+      if (data.success) {
+        toast.success(data.msg || "Signup successful");
+        setIsAuthenticated(true);
       } else {
-        toast.error("Unable to connect to the server, please try again later");
+        // If the response is a 400 error, show specific messages
+        if (response.status === 400) {
+          toast.error(data.msg || "An error occurred during registration");
+        } else {
+          toast.error("An unexpected error occurred");
+        }
       }
+    } catch (error) {
+      toast.error("Unable to connect to the server, please try again later");
     }
   };
-
+  
+  
+  
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="bg-white shadow-lg rounded-lg p-8 w-96">
