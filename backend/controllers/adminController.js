@@ -55,48 +55,33 @@ export const registerAdmin = async (req, res) => {
  */
 export const loginAdmin = async (req, res) => {
   try {
-    const { email, password } = req.body;
-    const admin = await Admin.findOne({ email });
+       const { email, password } = req.body;
+       const admin = await Admin.findOne({email});
+       if (!admin ) {
+            return res.status(400).json({ msg: 'Invalid email'  , success: false  });
+       }
+       if(!admin.isPasswordCorrect(password)){
 
-    // Check if the admin exists
-    if (!admin) {
-      return res.status(400).json({ 
-        msg: 'Invalid email or password', 
-        success: false 
-      });
-    }
+            return res.status(400).json({ msg: 'Invalid email' , success: false  });
+       }
+       const token = admin.generateAccessToken();
+       res.cookie('token', token, {
+            httpOnly: true,  // Cookie can only be accessed by the server
+            maxAge: 24 * 60 * 60 * 1000,  // 1 day
+            // secure: process.env.NODE_ENV === 'production', // Ensure it works only on HTTPS in production
+            // sameSite: 'strict',  // Prevents CSRF attacks
+        });
+        return res.status(200).json({msg:'User Login Sucessfully'  ,success: true });
 
-    // Verify the password
-    const isMatch = await bcrypt.compare(password, admin.password);
-    if (!isMatch) {
-      return res.status(400).json({ 
-        msg: 'Invalid email or password', 
-        success: false 
-      });
-    }
 
-    // Generate a token
-    const token = jwt.sign({ id: admin._id }, process.env.JWT_SECRET, { expiresIn: '1d' });
-    res.cookie('token', token, {
-      httpOnly: true,
-      maxAge: 24 * 60 * 60 * 1000, // 1 day
-    });
 
-    return res.status(200).json({ 
-      msg: 'Login successful', 
-      admin: { email: admin.email, name: admin.name },
-      success: true 
-    });
+       
   } catch (error) {
-    console.error(error.message);
-    return res.status(500).json({ 
-      msg: 'An error occurred during login', 
-      error: error.message,
-      success: false 
-    });
+       console.error(error.message);
+  return res.status(404).json({msg:error.message  , success: false} );
   }
-};
 
+};
 /**
  * Create a new Quiz
  * @param {Object} req - The request object, containing quiz data.
