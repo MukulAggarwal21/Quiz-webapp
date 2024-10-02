@@ -13,17 +13,18 @@ const LoginPage = () => {
     try {
       const response=await axios
         .post(
-          `${process.env.URL}/admin/login`,
+          `http://localhost:5000/admin/login`,
           { email, password },
           {
             withCredentials: true,
             headers: { "Content-Type": "application/json" },
           }
         );
-        toast.success(response.data.message );
-          setIsAuthenticated(true);
-           setEmail(""); 
-          setPassword("");
+        console.log(response.data);
+        // toast.success(response.data.message );
+        //   setIsAuthenticated(true);
+        //    setEmail(""); 
+        //   setPassword("");
          
       
     } catch (error) {

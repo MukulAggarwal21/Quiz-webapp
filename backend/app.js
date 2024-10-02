@@ -1,41 +1,49 @@
-import express from 'express';
-import dotenv from 'dotenv';
-import cookieParser from 'cookie-parser'; // Import cookie-parser
-import adminRoutes from './routes/adminRoutes.js';
-import connectDB from './config/db.js';
-import cors from 'cors';
+import express from 'express'; // Import Express
+import dotenv from 'dotenv'; // Import dotenv for environment variables
+import cookieParser from 'cookie-parser'; // For parsing cookies
+import adminRoutes from './routes/adminRoutes.js'; // Admin routes
+import connectDB from './config/db.js'; // DB connection logic
+import cors from 'cors'; // Import CORS
 
-// Load environment variables
+// Load environment variables from .env file
 dotenv.config();
 
-// Initialize the app
+// Initialize the Express app
 const app = express();
 
-// Connect to database
-connectDB();
+// Connect to MongoDB using the connectDB function
+await connectDB();
 
 // Middleware
-app.use(express.json()); // For parsing JSON bodies
-app.use(cookieParser()); // Middleware to parse cookies
+
+// Parses incoming JSON payloads
+app.use(express.json()); 
+
+// Parses cookies attached to the client request object
+app.use(cookieParser()); 
+
+// Define CORS options
 const corsOptions = {
-  origin: 'http://localhost:3000',  // Allow requests from your React app
-  credentials: true,  // Allow credentials (cookies, authentication headers)
+  origin: 'http://localhost:3000',  // Frontend origin (Next.js)
+  credentials: true,  // Allow credentials (cookies, auth headers)
   methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed HTTP methods
   allowedHeaders: ['Content-Type', 'Authorization'], // Allowed headers
 };
 
-app.use(cors(corsOptions)); // Enable CORS with the defined options // Enable CORS for all origins
+// Enable CORS for the defined options
+app.use(cors(corsOptions)); 
 
-// Routess
-app.use('/admin', adminRoutes);
+// Register routes
+app.use('/admin', adminRoutes); // Routes for admin functionality
 
 // Error handling middleware
 app.use((err, req, res, next) => {
   const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
   res.status(statusCode).json({
     message: err.message,
-    stack: process.env.NODE_ENV === 'production' ? null : err.stack,
+    stack: process.env.NODE_ENV === 'production' ? null : err.stack, // Show stack trace in development mode only
   });
 });
 
+// Export the Express app
 export default app;

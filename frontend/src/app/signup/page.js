@@ -48,14 +48,22 @@ const SignupPage = () => {
           headers: { "Content-Type": "application/json" },
         }
       );
-      console.dir(response)
-      toast.success(response.response.data.msg);
-      setIsAuthenticated(true);
+      console.dir(  "my response" , response.response)
+      if(response.status==200){
+        // console.dir(response.data.msg)
+        toast.success(response.response.data.msg||"Signup succes");
+        // console.dir(response)
+      setIsAuthenticated(true); 
+      }
+      else{
+        toast.error(response.response.data.msg|| "An error occurred during registration");
+      }
+     
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       if (error.response) {
-        console.dir(response)
-        toast.error(error.response || "An error occurred during registration");
+        
+        toast.error(error.message|| "An error occurred during registration");
       } else {
         toast.error("Unable to connect to the server, please try again later");
       }

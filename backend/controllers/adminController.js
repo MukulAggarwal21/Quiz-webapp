@@ -7,6 +7,7 @@ import { Question } from '../models/questionModel.js';
 // Register Admin
 export const registerAdmin = async (req, res) => {
     try {
+      console.log("inside admin")
      const { email , password , name}= req.body;
      const admin =  await Admin.findOne({email});
      console.log(admin)
@@ -72,54 +73,61 @@ export const loginAdmin = async (req, res) => {
 
 
 
-   export const createQuiz = async (req, res) => {
-     try {
-       const { title, questionsData, startTime, endTime, duration } = req.body;
-       const createdBy = req.admin._id; // Admin ID from the middleware
-       console.log(createdBy)
-       if(!createdBy ||!duration){
-          return res.status(404).json({msg:"no params founf", createdBy ,duration})
-       }
-   
-       // Step 1: Create an array to hold question IDs
-       const questionIds = [];
-   
-       // Step 2: Iterate over the questions data from the request
-       for (const questionData of questionsData) {
-         // Create a new question document
-         const question = new Question({
-           question: questionData.question,
-           options: [
-             questionData.option1,
-             questionData.option2,
-             questionData.option3,
-             questionData.option4,
-           ],
-           correctAnswer: questionData.correctAnswer,
-         });
-   
-         // Save the question to the database
-         const savedQuestion = await question.save();
-         questionIds.push(savedQuestion._id); // Add the saved question ID to the array
-       }
-   
-       // Step 3: Create a new quiz with the saved question IDs
-       const quiz = new Quiz({
-         title,
-         questions: questionIds,
-         createdBy,
-         startTime,
-         endTime,
-         duration: Number(duration), // Ensure duration is a Number
-       });
-   
-       // Step 4: Save the quiz to the database
-       await quiz.save();
-   
-       // Step 5: Send the response back
-       res.status(201).json({ message: 'Quiz created successfully', quiz });
-     } catch (error) {
-       console.error(error.message);
-       res.status(500).json({ message: 'An error occurred', error: error.message });
-     }
-   };
+export const createQuiz = async (req, res) => {
+  try {
+    const { title, questionsData, startTime, endTime, duration } = req.body;
+    const createdBy = req.admin?._id; // Admin ID from the middleware
+
+    // Validate input data
+    if (!title || !questionsData || questionsData.length === 0 || !duration || !createdBy) {
+      return res.status(400).json({ message: "Invalid parameters", createdBy, duration });
+    }
+
+    // Step 1: Create an array to hold question IDs
+    const questionIds = [];
+
+    // Step 2: Iterate over the questions data from the request
+    for (const questionData of questionsData) {
+      try {
+        const question = new Question({
+          question: questionData.question,
+          options: [
+            questionData.option1,
+            questionData.option2,
+            questionData.option3,
+            questionData.option4,
+          ],
+          correctAnswer: questionData.correctAnswer,
+        });
+
+        const savedQuestion = await question.save();
+        questionIds.push(savedQuestion._id); // Add the saved question ID to the array
+      } catch (error) {
+        console.error(`Error saving question: ${error.message}`);
+        return res.status(500).json({ message: `Error saving question: ${error.message}` });
+      }
+    }
+
+    console.log("Question IDs:", questionIds); // Log question IDs
+
+    // Step 3: Create a new quiz with the saved question IDs
+    console.log(questionIds)
+    const quiz = new Quiz({
+      title,
+      questions: questionIds,
+      createdBy,
+      startTime,
+      endTime,
+      duration: Number(duration), // Ensure duration is a Number
+    });
+
+    // Step 4: Save the quiz to the database
+    await quiz.save();
+
+    // Step 5: Send the response back
+    res.status(201).json({ message: 'Quiz created successfully', quiz });
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ message: 'An error occurred', error: error.message });
+  }
+};
