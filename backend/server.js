@@ -17,8 +17,7 @@ const io = new Server(server, {
   },
 });
 
-// Example Socket.IO connection handling
-handleSocketConnection(io);
+
 
 // Start the server
 server.listen(PORT, () => {
