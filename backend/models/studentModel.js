@@ -7,14 +7,12 @@ const studentSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+ 
   quizID: {
     type: mongoose.Schema.Types.ObjectId, // Reference to Quiz model
     ref: 'Quiz', // Refers to the Quiz model
     required: true,
   },
-  response: [{
-    type: String
-  }],
   score: {
     type: Number,
     default: 0,
