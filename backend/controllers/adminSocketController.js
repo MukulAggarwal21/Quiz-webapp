@@ -1,6 +1,9 @@
 import { Quiz } from '../models/quizModel.js'; // Assuming Mongoose Quiz model
 import { Question } from '../models/questionModel.js'; // Assuming Mongoose Question model
 import { io } from '../server.js'; // Import the socket.io instance
+import { AdminNameSpace } from '../server.js';
+import { StudentNameSpace } from '../server.js';
+import { Admin } from '../models/adminModel.js';
 
 let leaderboard = {}; // Track scores of all students
 let rooms = {}; // Track room data for each quiz
@@ -20,9 +23,10 @@ export const handleSocketConnection = (AdminNameSpace, name) => {
       socket.join(quiz.quizId);
       console.log(`Room created for quiz ${quizId} with roomId: ${quizId}`);
       console.log(`Room joined by admin for quiz ${quizId} with roomId: ${quizId}`);
-      io.to(quizId).emit('roomCreated', { quizId });
-      io.to(quizId).emit('adminJoined', {name, quizId});
-      
+      StudentNameSpace.to(quizId).emit('roomCreated', { quizId });
+      AdminNameSpace.to(quizId).emit('roomCreated', { quizId });
+      StudentNameSpace.to(quizId).emit('adminJoined', {name, quizId});
+      AdminNameSpace.to(quizId).emit('adminJoined', {name, quizId});
     });
 
     // // Student joins a quiz room
