@@ -13,6 +13,9 @@ const studentSchema = new mongoose.Schema({
     ref: 'Quiz', // Refers to the Quiz model
     required: true,
   },
+  respponse:[{
+    type: String
+  }],
   score: {
     type: Number,
     default: 0,

@@ -15,8 +15,6 @@ export const protectAdmin = async (req, res, next) => {
 
       // Find admin by ID and attach to request
       req.admin = await Admin.findById(decoded._id).select('-password');
-      console.log(req.admin._id)
-
       next();
     } catch (error) {
       console.error(error);
