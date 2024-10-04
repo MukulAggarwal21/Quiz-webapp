@@ -1,7 +1,8 @@
 import { Quiz } from '../models/quizModel.js'; // Assuming Mongoose Quiz model
 import { Question } from '../models/questionModel.js'; // Assuming Mongoose Question model
 import Student from '../models/studentModel.js';
-import { io } from '../server.js'; // Import the socket.io instance
+import { AdminNameSpace, io } from '../server.js'; // Import the socket.io instance
+import { StudentNameSpace } from '../server.js';
 // import { createClient } from 'redis';
 
 // const client = createClient({
@@ -38,8 +39,8 @@ export const handleSocketConnection = (StudentNameSpace) => {
       socket.join(quiz.quizId);
       console.log(`Student ${studentName} joined room ${quiz.quizId}`);
       console.log(`${studentName} joined room ${quiz.quizId}`);
-      io.to(quiz.quizId).emit('studentJoined', {studentName, quizId});
-      
+      AdminNameSpace.to(quiz.quizId).emit('studentJoined', {studentName, quizId});
+      StudentNameSpace.to(quiz.quizId).emit('studentJoined', {studentName, quizId});
       // // Update leaderboard for the room
       // if (!leaderboard[studentName]) {
       //   leaderboard[studentName] = { score: 0, studentId: studentName };
