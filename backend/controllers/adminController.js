@@ -3,6 +3,8 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { Quiz } from '../models/quizModel.js';
 import { Question } from '../models/questionModel.js';
+import { handleSocketConnection } from './adminSocketController.js';
+import { AdminNameSpace } from '../server.js';
 
 /**
  * Register a new Admin
@@ -99,7 +101,7 @@ const generateQuizId = async () => {
 };
 
 // Create Quiz Function
-const createQuiz1 = async (req, res) => {
+export const createQuiz = async (req, res) => {
   try {
     const { title, duration, questionsData, startTime, endTime } = req.body;
     console.log("Received Quiz Title:", title);
@@ -178,4 +180,19 @@ const createQuiz1 = async (req, res) => {
 };
 
 
-export { createQuiz1 };
+export const readyQuiz  = async (req, res) => {
+  try {
+    console.log("Ready Quiz Request:", req.body);
+    const { quizId } = req.body;
+    handleSocketConnection(AdminNameSpace, req.admin?.name);
+    return res.status(201).json({success: true, message: "Quiz is ready to start", quizId});
+  } catch (error) {
+    console.error("Error creating quiz:", error);
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred while creating the quiz.",
+      error: error.message, // Provide the error message for debugging
+    });
+  }
+}
+

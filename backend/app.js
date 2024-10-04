@@ -2,6 +2,7 @@ import express from 'express'; // Import Express
 import dotenv from 'dotenv'; // Import dotenv for environment variables
 import cookieParser from 'cookie-parser'; // For parsing cookies
 import adminRoutes from './routes/adminRoutes.js'; // Admin routes
+import studentRoutes from './routes/studentRoutes.js'; // Student routes
 import connectDB from './config/db.js'; // DB connection logic
 import cors from 'cors'; // Import CORS
 
@@ -24,7 +25,7 @@ app.use(cookieParser());
 
 // Define CORS options
 const corsOptions = {
-  origin: 'http://localhost:3000',  // Frontend origin (Next.js)
+  origin: '*',  // Frontend origin (Next.js)
   credentials: true,  // Allow credentials (cookies, auth headers)
   methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed HTTP methods
   allowedHeaders: ['Content-Type', 'Authorization'], // Allowed headers
@@ -35,6 +36,7 @@ app.use(cors(corsOptions));
 
 // Register routes
 app.use('/admin', adminRoutes); // Routes for admin functionality
+app.use('/student', studentRoutes); // Routes for student functionality
 
 // Error handling middleware
 app.use((err, req, res, next) => {
