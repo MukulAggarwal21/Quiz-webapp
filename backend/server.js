@@ -2,6 +2,7 @@ import app from './app.js'; // Importing the Express app
 import { Server } from 'socket.io'; // Importing Socket.IO
 import http from 'http'; // Node.js HTTP module
 import { handleSocketConnection } from './controllers/studentSocketcontroller.js';
+import { instrument } from "@socket.io/admin-ui";
 // Set the port, defaulting to 5000 if not set in environment variables
 const PORT = process.env.PORT || 5000;
 
@@ -16,8 +17,13 @@ export const io = new Server(server, {
     credentials: true,                // Enable credentials (cookies and headers)
   },
 });
+//admin ui
+instrument(io, {
+  auth: false,
+  mode: "development",
+});
 
-export const AdminNameSpace = io.of('/admin');
+export const AdminNameSpace = io.of('/qadmin');
 export const StudentNameSpace = io.of('/student');
 
 
